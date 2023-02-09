@@ -6,7 +6,8 @@ from rango.forms import CategoryForm
 from django.shortcuts import redirect
 from django.urls import reverse
 from rango.forms import PageForm, UserForm, UserProfileForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
@@ -199,7 +200,7 @@ def user_login(request):
             if user.is_active:
                 # If the account is valid and active, we can log the user in.
                 # We'll send the user to the homepage.
-                login(request,user)
+                login(request, user)
                 return redirect(reverse('rango:index'))
             else:
                 # An inactive account was used - no logging in!
@@ -213,3 +214,14 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank directory object...
         return render(request, 'rango/login.html')
+
+@login_required
+def restricted(request):
+    return HttpResponse("Since you're logged in, you can see this text!")
+
+@login_required
+def user_logout(request):
+    # Since we know the user is logged in, we can just log them out.
+    logout(request)
+    # Take the user back to the homepage.
+    return redirect(reverse('rango:index'))
